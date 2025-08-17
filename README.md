@@ -91,6 +91,7 @@ http://127.0.0.1:5000
 ```
 Nuvemhost/
 │── app.py              # Arquivo principal da aplicação Flask
+│── mail_zoho.py        # Arquivo de email do projeto
 │── requirements.txt    # Dependências do Python
 │── .env                # Variáveis de ambiente (não versionar)
 │── .gitignore          # Arquivos ignorados pelo Git
