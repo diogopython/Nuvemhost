@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - NuvemHost{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="auth-card">
+                <div class="auth-header text-center mb-4">
+                    <div class="auth-icon mb-3">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h1 class="fw-bold mb-2">Create Account</h1>
+                    <p class="text-muted">Join NuvemHost and start hosting your projects</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="username" name="username" 
+                               placeholder="Username" required pattern="[a-zA-Z0-9_]{3,20}" 
+                               title="3-20 characters, letters, numbers, and underscores only">
+                        <label for="username">
+                            <i class="bi bi-person me-2"></i>Username
+                        </label>
+                        <div class="form-text">3-20 characters, letters, numbers, and underscores only</div>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="Email" required>
+                        <label for="email">
+                            <i class="bi bi-envelope me-2"></i>Email Address
+                        </label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Password" required minlength="6">
+                        <label for="password">
+                            <i class="bi bi-lock me-2"></i>Password
+                        </label>
+                        <div class="form-text">Minimum 6 characters</div>
+                    </div>
+                    
+                    <div class="form-floating mb-4">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                               placeholder="Confirm Password" required>
+                        <label for="confirm_password">
+                            <i class="bi bi-lock-fill me-2"></i>Confirm Password
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Create Account
+                    </button>
+                </form>
+                
+                <div class="auth-footer text-center">
+                    <p class="mb-0">Already have an account? 
+                        <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">
+                            Sign in here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+{% endblock %}

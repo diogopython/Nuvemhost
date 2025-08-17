@@ -1,0 +1,24 @@
+2025-08-17 04:33:21,277 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:6000
+ * Running on http://72.60.1.190:6000 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:21,277 INFO: [33mPress CTRL+C to quit[0m [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:21,277 INFO:  * Restarting with stat [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:21,426 WARNING:  * Debugger is active! [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:21,426 INFO:  * Debugger PIN: 100-593-633 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:54,732 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:6000
+ * Running on http://72.60.1.190:6000 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:54,733 INFO: [33mPress CTRL+C to quit[0m [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:54,733 INFO:  * Restarting with stat [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:54,874 WARNING:  * Debugger is active! [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:33:54,874 INFO:  * Debugger PIN: 100-593-633 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:34:18,118 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:6000
+ * Running on http://72.60.1.190:6000 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:34:18,118 INFO: [33mPress CTRL+C to quit[0m [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:34:18,118 INFO:  * Restarting with stat [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:34:18,258 WARNING:  * Debugger is active! [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]
+2025-08-17 04:34:18,258 INFO:  * Debugger PIN: 100-593-633 [in /root/venv/lib/python3.13/site-packages/werkzeug/_internal.py:96]

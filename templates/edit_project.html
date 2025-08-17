@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ project_name }} - NuvemHost{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/matchesonscrollbar.css">
+{% endblock %}
+
+{% block content %}
+<div class="editor-layout">
+    <!-- Sidebar -->
+    <div class="editor-sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                <i class="bi bi-folder-open me-2"></i>{{ project_name }}
+            </h5>
+            <div class="sidebar-actions">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Back
+                </a>
+                <a href="/project/{{ project_id }}/" target="_blank" class="btn btn-primary btn-sm">
+                    <i class="bi bi-eye me-1"></i>Preview
+                </a>
+            </div>
+        </div>
+        
+        <div class="file-tree">
+            <h6 class="file-tree-title">Project Files</h6>
+            {% for file in files %}
+            <div class="file-item" data-file="{{ file }}" onclick="loadFile('{{ file }}')">
+                <i class="bi bi-{% if file.endswith('.html') %}file-earmark-code{% elif file.endswith('.css') %}file-earmark-richtext{% elif file.endswith('.js') %}file-earmark-code-fill{% else %}file-earmark{% endif %}"></i>
+                {{ file }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Main Editor -->
+    <div class="editor-main">
+        <div class="editor-header">
+            <div class="editor-tabs">
+                <span class="current-file" id="currentFile">
+                    <i class="bi bi-file-earmark-code me-2"></i>Select a file to edit
+                </span>
+            </div>
+            <div class="editor-actions">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="formatCode()" id="formatBtn" disabled title="Format Code">
+                        <i class="bi bi-code"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="bi bi-palette"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                        <i class="bi bi-arrows-fullscreen" id="fullscreenIcon"></i>
+                    </button>
+                </div>
+                <button class="btn btn-success btn-sm" onclick="saveFile()" id="saveBtn" disabled>
+                    <i class="bi bi-floppy me-1"></i>Save
+                </button>
+            </div>
+        </div>
+        
+        <div class="editor-content">
+            <textarea id="codeEditor" placeholder="Select a file from the sidebar to start editing..."></textarea>
+        </div>
+        
+        <div class="editor-status">
+            <div class="status-left">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+                <span id="fileType">-</span>
+            </div>
+            <div class="status-right">
+                <span id="cursorPosition">Ln 1, Col 1</span>
+                <span id="fileSize">-</span>
+                <span id="encoding">UTF-8</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div class="modal fade" id="shortcutsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-keyboard me-2"></i>Keyboard Shortcuts
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>File Operations</h6>
+                        <ul class="list-unstyled small">
+                            <li><kbd>Ctrl+S</kbd> Save file</li>
+                            <li><kbd>Ctrl+F</kbd> Find</li>
+                            <li><kbd>Ctrl+H</kbd> Find & Replace</li>
+                            <li><kbd>F11</kbd> Toggle fullscreen</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Editor</h6>
+                        <ul class="list-unstyled small">
+                            <li><kbd>Ctrl+/</kbd> Toggle comment</li>
+                            <li><kbd>Ctrl+D</kbd> Duplicate line</li>
+                            <li><kbd>Ctrl+L</kbd> Select line</li>
+                            <li><kbd>Alt+Shift+F</kbd> Format code</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Success Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="saveToast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="bi bi-check-circle text-success me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            File saved successfully!
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/indent-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/comment-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/jump-to-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+
+<script>
+let editor;
+let currentFile = null;
+let projectId = '{{ project_id }}';
+let currentTheme = 'eclipse';
+let isFullscreen = false;
+let themes = ['eclipse', 'material-darker', 'dracula', 'monokai'];
+let currentThemeIndex = 0;
+
+// Initialize CodeMirror
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll(".footer").forEach(el => el.remove());
+
+    editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+        lineNumbers: true,
+        theme: currentTheme,
+        indentUnit: 2,
+        tabSize: 2,
+        lineWrapping: true,
+        autoCloseBrackets: true,
+        autoCloseTags: true,
+        matchBrackets: true,
+        styleActiveLine: true,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-/": "toggleComment",
+            "Ctrl-D": duplicateLine,
+            "Ctrl-L": selectLine,
+            "Alt-Shift-F": formatCode,
+            "F11": toggleFullscreen,
+            "Ctrl-S": function(cm) {
+                saveFile();
+                return false;
+            }
+        }
+    });
+    
+    // Update cursor position and file info
+    editor.on('cursorActivity', function() {
+        const cursor = editor.getCursor();
+        document.getElementById('cursorPosition').textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
+    });
+    
+    // Enable save button when content changes
+    editor.on('change', function() {
+        if (currentFile) {
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('formatBtn').disabled = false;
+            updateStatus('modified', 'Modified');
+        }
+    });
+    
+    // Auto-save every 30 seconds if modified
+    setInterval(() => {
+        if (currentFile && !document.getElementById('saveBtn').disabled) {
+            saveFile(true); // Silent save
+        }
+    }, 30000);
+});
+
+function loadFile(filePath) {
+    // Update UI
+    document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[data-file="${filePath}"]`).classList.add('active');
+    
+    const fileIcon = getFileIcon(filePath);
+    document.getElementById('currentFile').innerHTML = `<i class="bi bi-${fileIcon} me-2"></i>${filePath}`;
+    updateStatus('loading', 'Loading...');
+    
+    // Load file content
+    fetch(`/get_file_content/${projectId}/${filePath}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showNotification('Error loading file: ' + data.error, 'error');
+                return;
+            }
+            
+            currentFile = filePath;
+            editor.setValue(data.content);
+            
+            // Set appropriate mode based on file extension
+            const mode = getFileMode(filePath);
+            editor.setOption('mode', mode);
+            
+            // Update UI
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('formatBtn').disabled = false;
+            document.getElementById('fileType').textContent = getFileType(filePath);
+            document.getElementById('fileSize').textContent = formatFileSize(data.content.length);
+            updateStatus('ready', 'Ready');
+            
+            // Focus editor
+            editor.focus();
+        })
+        .catch(error => {
+            showNotification('Error loading file: ' + error, 'error');
+            updateStatus('error', 'Error');
+        });
+}
+
+function saveFile(silent = false) {
+    if (!currentFile) return;
+    
+    updateStatus('saving', 'Saving...');
+    document.getElementById('saveBtn').disabled = true;
+    
+    fetch(`/save_file_content/${projectId}/${currentFile}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            content: editor.getValue()
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showNotification('Error saving file: ' + data.error, 'error');
+            updateStatus('error', 'Error');
+            return;
+        }
+        
+        updateStatus('saved', 'Saved');
+        
+        if (!silent) {
+            showNotification('File saved successfully!', 'success');
+        }
+        
+        setTimeout(() => {
+            updateStatus('ready', 'Ready');
+        }, 2000);
+    })
+    .catch(error => {
+        showNotification('Error saving file: ' + error, 'error');
+        updateStatus('error', 'Error');
+        document.getElementById('saveBtn').disabled = false;
+    });
+}
+
+function formatCode() {
+    if (!currentFile) return;
+    
+    const content = editor.getValue();
+    const mode = editor.getOption('mode');
+    
+    // Basic formatting for different file types
+    if (mode === 'text/html' || mode === 'application/xml') {
+        const formatted = formatHTML(content);
+        editor.setValue(formatted);
+    } else if (mode === 'text/css') {
+        const formatted = formatCSS(content);
+        editor.setValue(formatted);
+    } else if (mode === 'text/javascript') {
+        const formatted = formatJS(content);
+        editor.setValue(formatted);
+    }
+    
+    showNotification('Code formatted!', 'success');
+}
+
+function toggleTheme() {
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+    currentTheme = themes[currentThemeIndex];
+    editor.setOption('theme', currentTheme);
+    
+    // Save theme preference
+    localStorage.setItem('editorTheme', currentTheme);
+    showNotification(`Theme changed to ${currentTheme}`, 'info');
+}
+
+function toggleFullscreen() {
+    const editorLayout = document.querySelector('.editor-layout');
+    
+    if (!isFullscreen) {
+        editorLayout.style.position = 'fixed';
+        editorLayout.style.top = '0';
+        editorLayout.style.left = '0';
+        editorLayout.style.width = '100vw';
+        editorLayout.style.height = '100vh';
+        editorLayout.style.zIndex = '9999';
+        editorLayout.style.background = 'white';
+        document.getElementById('fullscreenIcon').className = 'bi bi-fullscreen-exit';
+        isFullscreen = true;
+    } else {
+        editorLayout.style.position = '';
+        editorLayout.style.top = '';
+        editorLayout.style.left = '';
+        editorLayout.style.width = '';
+        editorLayout.style.height = '';
+        editorLayout.style.zIndex = '';
+        editorLayout.style.background = '';
+        document.getElementById('fullscreenIcon').className = 'bi bi-arrows-fullscreen';
+        isFullscreen = false;
+    }
+    
+    // Refresh editor
+    setTimeout(() => {
+        editor.refresh();
+    }, 100);
+}
+
+function duplicateLine(cm) {
+    const cursor = cm.getCursor();
+    const line = cm.getLine(cursor.line);
+    cm.replaceRange('\n' + line, {line: cursor.line, ch: line.length});
+}
+
+function selectLine(cm) {
+    const cursor = cm.getCursor();
+    cm.setSelection({line: cursor.line, ch: 0}, {line: cursor.line + 1, ch: 0});
+}
+
+function updateStatus(type, text) {
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    
+    statusDot.className = `status-dot ${type}`;
+    statusText.textContent = text;
+}
+
+function getFileIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    switch(ext) {
+        case 'html': return 'file-earmark-code';
+        case 'css': return 'file-earmark-richtext';
+        case 'js': return 'file-earmark-code-fill';
+        case 'json': return 'file-earmark-text';
+        case 'md': return 'file-earmark-text';
+        case 'txt': return 'file-earmark-text';
+        case 'png':
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+        case 'svg': return 'file-earmark-image';
+        default: return 'file-earmark';
+    }
+}
+
+function getFileMode(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    switch(ext) {
+        case 'html': return 'text/html';
+        case 'css': return 'text/css';
+        case 'js': return 'text/javascript';
+        case 'json': return 'application/json';
+        case 'md': return 'text/x-markdown';
+        default: return 'text/plain';
+    }
+}
+
+function getFileType(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    return ext.toUpperCase();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function formatHTML(html) {
+    // Basic HTML formatting
+    return html
+        .replace(/></g, '>\n<')
+        .replace(/^\s+|\s+$/g, '')
+        .split('\n')
+        .map((line, index) => {
+            const indent = '  '.repeat(Math.max(0, (line.match(/</g) || []).length - (line.match(/\//g) || []).length));
+            return indent + line.trim();
+        })
+        .join('\n');
+}
+
+function formatCSS(css) {
+    // Basic CSS formatting
+    return css
+        .replace(/\{/g, ' {\n  ')
+        .replace(/\}/g, '\n}\n')
+        .replace(/;/g, ';\n  ')
+        .replace(/,/g, ',\n')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+}
+
+function formatJS(js) {
+    // Basic JS formatting
+    return js
+        .replace(/\{/g, ' {\n  ')
+        .replace(/\}/g, '\n}')
+        .replace(/;/g, ';\n')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+}
+
+function showNotification(message, type = 'success') {
+    const toast = document.getElementById('saveToast');
+    const toastBody = toast.querySelector('.toast-body');
+    const toastIcon = toast.querySelector('i');
+    
+    toastBody.textContent = message;
+    
+    // Update icon based on type
+    toastIcon.className = type === 'success' ? 'bi bi-check-circle text-success me-2' :
+                         type === 'error' ? 'bi bi-exclamation-triangle text-danger me-2' :
+                         'bi bi-info-circle text-info me-2';
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+// Load saved theme preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('editorTheme');
+    if (savedTheme && themes.includes(savedTheme)) {
+        currentTheme = savedTheme;
+        currentThemeIndex = themes.indexOf(savedTheme);
+        if (editor) {
+            editor.setOption('theme', currentTheme);
+        }
+    }
+});
+
+// Keyboard shortcuts help
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F1') {
+        e.preventDefault();
+        const modal = new bootstrap.Modal(document.getElementById('shortcutsModal'));
+        modal.show();
+    }
+});
+
+// Prevent accidental page leave
+window.addEventListener('beforeunload', function(e) {
+    if (currentFile && !document.getElementById('saveBtn').disabled) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+    }
+});
+</script>
+{% endblock %}

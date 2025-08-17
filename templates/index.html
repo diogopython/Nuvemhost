@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-3 fw-bold mb-4 text-white">
+                        Host Your Projects
+                        <span class="text-gradient">Online</span>
+                    </h1>
+                    <p class="lead mb-5 text-white-50">
+                        Upload your HTML/CSS projects and share them with the world instantly. 
+                        Create beautiful websites with our modern hosting platform.
+                    </p>
+                    
+                    {% if not session.user_id %}
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 py-3">
+                            <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg px-4 py-3">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('upload_project') }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                            <i class="bi bi-cloud-upload me-2"></i>Upload Project
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <div class="d-inline-block p-4 bg-white bg-opacity-10 rounded-3">
+                        <i class="bi bi-code-slash text-white" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Why Choose NuvemHost?</h2>
+                <p class="lead text-muted">
+                    Everything you need to host and share your web projects online
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Lightning Fast</h5>
+                    <p class="text-muted">
+                        Upload your ZIP file and get your project live in seconds. 
+                        No complex setup or configuration required.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-code-slash"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Built-in Editor</h5>
+                    <p class="text-muted">
+                        Edit your HTML, CSS, and JavaScript files directly in the browser 
+                        with our powerful code editor.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Secure & Safe</h5>
+                    <p class="text-muted">
+                        Your projects are hosted securely with file validation 
+                        and protection against malicious uploads.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Get your project online in 3 simple steps</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Create Account</h5>
+                    <p class="text-muted">
+                        Sign up for free and get access to your personal dashboard
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="bi bi-cloud-upload"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Upload Project</h5>
+                    <p class="text-muted">
+                        Zip your HTML/CSS files and upload. Make sure <code>index.html</code> 
+                        is in the root of your ZIP file.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="bi bi-share"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Share & Edit</h5>
+                    <p class="text-muted">
+                        Get your unique URL, share your project, and edit files online anytime
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
