@@ -89,9 +89,8 @@ http://127.0.0.1:5000
 ## 📂 Estrutura do projeto
 
 ```
-flaskhostingg/
+Nuvemhost/
 │── app.py              # Arquivo principal da aplicação Flask
-│── config.py           # Configurações do projeto (opcional)
 │── requirements.txt    # Dependências do Python
 │── .env                # Variáveis de ambiente (não versionar)
 │── .gitignore          # Arquivos ignorados pelo Git
